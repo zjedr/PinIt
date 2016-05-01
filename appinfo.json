@@ -1,0 +1,46 @@
+{
+    "appKeys": {
+        "AppKeyReady": 0
+    },
+    "capabilities": [
+        "configurable"
+    ],
+    "companyName": "ZJED",
+    "enableMultiJS": true,
+    "longName": "PinIt",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/action_icon_check.png",
+                "name": "IMAGE_ACTION_ICON_CHECK",
+                "targetPlatforms": null,
+                "type": "png-trans"
+            },
+            {
+                "file": "images/action_icon_minus.png",
+                "name": "IMAGE_ACTION_ICON_MINUS",
+                "targetPlatforms": null,
+                "type": "png-trans"
+            },
+            {
+                "file": "images/action_icon_plus.png",
+                "name": "IMAGE_ACTION_ICON_PLUS",
+                "targetPlatforms": null,
+                "type": "png-trans"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "PinIt",
+    "targetPlatforms": [
+        "aplite",
+        "basalt",
+        "chalk"
+    ],
+    "uuid": "036449a5-0251-45d5-b796-924fcc5331c4",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
