@@ -18,8 +18,8 @@
       <div data-role="ui-content" class="ui-page-theme-d ui_mini">
 
         <div data-role="fieldcontain">
-          <label for="nightscout-url">Nightscout URL:</label>
-          <input type="url" name="nightscout-url" id="nightscout-url" placeholder="https://{your ns site}.azurewebsites.net"></input>
+          <label for="nightscout_url">Nightscout URL:</label>
+          <input type="url" name="nightscout_url" id="nightscout_url" placeholder="https://{your ns site}.azurewebsites.net"></input>
         </div>
         <div data-role="fieldcontain" >
 		    <label for="timeline">Pebble Timeline Pin:</label>
@@ -37,7 +37,7 @@
               <div class="ui-block-c"><input type="number" id="inc1" name="inc1" min="0.5" step="0.5"></input></div>
               <div class="ui-block-d">
 			    <select  id="ns1" name="ns1" >
-				  <option value="None" ></option>
+				  <option value="" ></option>
 				  <option value="IOB" >IOB</option>
 				  <option value="COB" >COB</option>
 				</select>
@@ -47,7 +47,7 @@
               <div class="ui-block-c"><input type="number" id="inc2" name="inc2" min="0.5" step="0.5"></input></div>
               <div class="ui-block-d">
 			    <select id="ns2" name="ns2" >
-				  <option value="None" ></option>
+				  <option value="" ></option>
 				  <option value="IOB" >IOB</option>
 				  <option value="COB" >COB</option>
 				</select>
@@ -57,7 +57,7 @@
               <div class="ui-block-c"><input type="number" id="inc3" name="inc3" min="0.5" step="0.5"></input></div>
               <div class="ui-block-d">
 			    <select id="ns3" name="ns3" >
-				  <option value="None" ></option>
+				  <option value="" ></option>
 				  <option value="IOB" >IOB</option>
 				  <option value="COB" >COB</option>
 				</select>
@@ -67,7 +67,7 @@
               <div class="ui-block-c"><input type="number" id="inc4" name="inc4" min="0.5" step="0.5"></input></div>
               <div class="ui-block-d">
 			    <select id="ns4" name="ns4" >
-				  <option value="None" ></option>
+				  <option value="" ></option>
 				  <option value="IOB" >IOB</option>
 				  <option value="COB" >COB</option>
 				</select>
@@ -77,7 +77,7 @@
               <div class="ui-block-c"><input type="number" id="inc5" name="inc5" min="0.5" step="0.5"></input></div>
               <div class="ui-block-d">
 			    <select id="ns5" name="ns5" >
-				  <option value="None" ></option>
+				  <option value="" ></option>
 				  <option value="IOB" >IOB</option>
 				  <option value="COB" >COB</option>
 				</select>
@@ -93,28 +93,28 @@
     <script>
       function saveOptions() {
         var options = {
-          'nightscout-url': $("#nightscout-url").val(),
+          'nightscout_url': $("#nightscout_url").val(),
           'timeline': $("#timeline").is(':checked'),
           'label1':  $("#label1").val(),
           'def1': $("#def1").val(),
           'inc1': $("#inc1").val(),
-          'ns1': $("#ns1").val(),
+          'ns1': $('#ns1').selectmenu().val(),
           'label2':  $("#label2").val(),
           'def2': $("#def2").val(),
           'inc2': $("#inc2").val(),
-          'ns2': $("#ns2").val(),
+          'ns2': $('#ns2').selectmenu().val(),
           'label3':  $("#label3").val(),
           'def3': $("#def3").val(),
           'inc3': $("#inc3").val(),
-          'ns3': $("#ns3").val(),
+          'ns3': $('#ns3').selectmenu().val(),
           'label4':  $("#label4").val(),
           'def4': $("#def4").val(),
           'inc4': $("#inc4").val(),
-          'ns4': $("#ns4").val(),
+          'ns4': $('#ns4').selectmenu().val(),
           'label5':  $("#label5").val(),
           'def5': $("#def5").val(),
           'inc5': $("#inc5").val(),
-          'ns5': $("#ns5").val(),
+          'ns5': $('#ns5').selectmenu().val(),
         }
         return options;
       }
@@ -129,7 +129,60 @@
           document.location = location;
         });
 
+		var current = JSON.parse(getQueryParam('current', '{}'));
+		populateValues(current);
+
       });
-    </script>
+
+	function populateValues(current) {
+    document.getElementById('nightscout_url').value = current['nightscout_url'];
+
+    if (current.timeline === true) {
+	  $('#timeline').attr('checked','');
+      $('#timeline').parent('div').addClass('ui-flipswitch-active');
+    }
+ 
+    document.getElementById('label1').value = current['label1'];
+    document.getElementById('def1').value = current['def1'];
+    document.getElementById('inc1').value = current['inc1'];
+    document.getElementById('ns1').value = current['ns1'];
+	$('#ns1').siblings('span').text(current['ns1']);
+    document.getElementById('label2').value = current['label2'];
+    document.getElementById('def2').value = current['def2'];
+    document.getElementById('inc2').value = current['inc2'];
+    document.getElementById('ns2').value = current['ns2'];
+	$('#ns2').siblings('span').text(current['ns2']);
+    document.getElementById('label3').value = current['label3'];
+    document.getElementById('def3').value = current['def3'];
+    document.getElementById('inc3').value = current['inc3'];
+    document.getElementById('ns3').value = current['ns3'];
+ 	$('#ns3').siblings('span').text(current['ns3']);
+   document.getElementById('label4').value = current['label4'];
+    document.getElementById('def4').value = current['def4'];
+    document.getElementById('inc4').value = current['inc4'];
+    document.getElementById('ns4').value = current['ns4'];
+ 	$('#ns41').siblings('span').text(current['ns4']);
+   document.getElementById('label5').value = current['label5'];
+    document.getElementById('def5').value = current['def5'];
+    document.getElementById('inc5').value = current['inc5'];
+    document.getElementById('ns5').value = current['ns5'];
+	$('#ns51').siblings('span').text(current['ns5']);
+
+
+	}
+
+  function getQueryParam(variable, defaultValue) {
+    var query = document.location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split('=');
+      if (pair[0] === variable) {
+        return decodeURIComponent(pair[1]);
+      }
+    }
+    return defaultValue || false;
+  }
+
+	  </script>
   </body>
 </html>

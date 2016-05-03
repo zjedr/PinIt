@@ -1,31 +1,53 @@
 var timeline = require('timeline');
 
 var PIN_ID = "PinIt-";
-	  console.log('start!');
+console.log('start!');
+
 
 Pebble.addEventListener('showConfiguration', function() {
   var url = 'http://www.zjed.net/Configuration.html';
+  var config = JSON.parse(localStorage.getItem('config'));
+  url += '?current=' + encodeURIComponent(JSON.stringify(config));
   console.log('Showing configuration page: ' + url);
   Pebble.openURL(url);
 });
 
 Pebble.addEventListener('webviewclosed', function(e) {
-  var configData = JSON.parse(decodeURIComponent(e.response));
-  console.log('Configuration page returned: ' + JSON.stringify(configData));
+  var config = JSON.parse(decodeURIComponent(e.response));
+  console.log('Configuration page returned: ' + JSON.stringify(config));
   
- 	var dict = {};
-  dict[1] = configData.label1 ;
-  dict[2] = configData.default1 ;
-  dict[3] = configData.increment1 ;
-  console.log('dict: ' + JSON.stringify(dict)); 
-  // Send to watchapp
-  Pebble.sendAppMessage(dict, function() {
-    console.log('Send successful: ' + JSON.stringify(dict));
+  LoadConfig(config) ;  
+  
+});
+
+function LoadConfig(config) {
+  
+  var message = {0: 1,
+      label1: config.label1,
+      def1: config.def1,
+      inc1: (config.inc1 * 10).toString(),
+      label2: config.label2,
+      def2: config.def2,
+      inc2: (config.inc2 * 10).toString(),
+      label3: config.label3,
+      def3: config.def3,
+      inc3: (config.inc3 * 10).toString(),
+      label4: config.label4,
+      def4: config.def4,
+      inc4: (config.inc4 * 10).toString(),
+      label5: config.label5,
+      def5: config.def5,
+      inc5: (config.inc5 * 10).toString(),
+    };
+  
+  console.log('message: ' + JSON.stringify(message)); 
+  Pebble.sendAppMessage(message, function() {
+     console.log('Send successful: ' + JSON.stringify(message));
+     localStorage.setItem('config', JSON.stringify(config));
   }, function() {
     console.log('Send failed!');
   });
-
-});
+}
 
 Pebble.addEventListener('ready', function() {
   console.log('PebbleKit JS ready!');
@@ -36,9 +58,16 @@ Pebble.addEventListener('ready', function() {
 
     // tell the C side we're ready
     if (internet_status) {
-      Pebble.sendAppMessage({0: true});
+      Pebble.sendAppMessage({0:0});
+      var config = JSON.parse(localStorage.getItem('config'));
+
+      console.log('local:' + JSON.stringify(config));
+
+      if (config !== null ) {
+         LoadConfig(config) ;  
+      }
     } else {
-      Pebble.sendAppMessage({4: true});
+      Pebble.sendAppMessage({0:2});
     }
 
     // log the timeline token
@@ -55,13 +84,13 @@ Pebble.addEventListener('ready', function() {
 
 });
 
-function PostNightscout(s_type, s_value) {
+function PostNightscout(s_NS_site, s_type, s_value, s_ns ) {
   
-  if (s_type !== '') {
+  if (s_type !== '' && s_NS_site !== '' && s_ns !== '' ) {
     var method = 'POST';
-    var url = 'https://zjedcgm.azurewebsites.net/api/v1/treatments';
+    var url = s_NS_site + '/api/v1/treatments';
     var params = '' ;
-    if ( s_type == 'Carbs') {
+    if ( s_ns == 'COB') {
       params = 'eventType=' + s_type + '&carbs=' + s_value;
     } else {
       params = 'eventType=' + s_type + '&insulin=' + s_value;
@@ -75,15 +104,12 @@ function PostNightscout(s_type, s_value) {
     request.onload = function() {
       // The request was successfully completed!
       console.log('Got response: ' + this.responseText);
-      Pebble.sendAppMessage({5: true});
     };
     
     // Send the request
     request.open(method, url);
     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     request.send(params);
-  } else {
-    Pebble.sendAppMessage({5: true});
   }
 }
 
@@ -92,26 +118,42 @@ Pebble.addEventListener('appmessage', function(e) {
 
   var s_title = '' ;
   var s_value = 0 ;
-  var s_type = '';
-  if (e.payload[1]) {
-    s_title = 'Insulin:' ;
-    s_value = e.payload[1] ;
-    s_type = 'Meal+Bolus';
-  } else if ( e.payload[2] ) {
-    s_title  = 'Carbs:'  ;
-    s_value = e.payload[2] ;
-    s_type = 'Carbs';
-  } else if ( e.payload[3] ) {
-    s_title  = 'Protein:'  ;
-    s_value = e.payload[3] ;
-  }
-  if ( e.payload.key == 4 ) { 
-        console.log( e.payload[4] );
-  } else {
-    s_value = s_value / 10 ;
-    s_title = s_title + ' ' + s_value ;
-    console.log( 'title' +  s_title );
+  var s_ns = '';
+  var s_unit = '';
+  var config = JSON.parse(localStorage.getItem('config'));
   
+  var reply = e.payload;
+
+  console.log('Got message: ' + JSON.stringify(reply));
+
+  if (reply.label1) {
+    s_title = config.label1 ;
+    s_ns = config.ns1;
+    s_value = reply.label1 ;
+  } else if ( reply.label2 ) {
+    s_title  = config.label2 ;
+    s_ns = config.ns2;
+    s_value = reply.label2 ;
+  } else if ( reply.label3) {
+    s_title  = config.label3 ;
+    s_ns = config.ns3;
+    s_value = reply.label3 ;
+  } else if ( reply.label4 ) {
+    s_title  = config.label4 ;
+    s_ns = config.ns4;
+    s_value = reply.label4 ;
+  } else if ( reply.label5 ) {
+    s_title  = config.label5 ;
+    s_ns = config.ns5;
+    s_value = reply.label5 ;
+  }
+  s_value = s_value / 10 ;
+  
+  if ( s_ns == 'IOB') { s_unit = 'u';}
+  if ( s_ns == 'COB') { s_unit = 'g';}
+  console.log( 'title:' +  s_title + ':' + s_value  + ':' + s_ns );
+  PostNightscout(config.nightscout_url, s_title, s_value, s_ns);
+  if ( console.timeline ) {
     var date = new Date();
   
     // Create the pin
@@ -120,20 +162,19 @@ Pebble.addEventListener('appmessage', function(e) {
       "time": date.toISOString(),
       "layout": {
         "type": "genericPin",
-        "title": s_title,
-   //     "body": s_title,
+        "title": s_title + ' ' + s_value + s_unit,
         "tinyIcon": "system://images/GLUCOSE_MONITOR"
       }
-      
     };
-  
-    console.log('Inserting pin: ' + JSON.stringify(pin));
-  
-    timeline.insertUserPin(pin, function(responseText) { 
-      console.log('Result: ' + responseText);
-      PostNightscout(s_type,s_value);
-    });
-  }
-   
+    
+      console.log('Inserting pin: ' + JSON.stringify(pin));
+    
+      timeline.insertUserPin(pin, function(responseText) { 
+        console.log('Result: ' + responseText);
+        Pebble.sendAppMessage({0:3});
+      });
+   } else {
+    Pebble.sendAppMessage({0:3});
+ }
 });
 
