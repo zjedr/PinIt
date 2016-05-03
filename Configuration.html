@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>PinIt</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script> 
+</head>
+  <body>
+    <div data-role="page" id="main" >
+      <div data-role="header" >
+        <h1>PinIt</h1>
+      </div>
+
+      <div data-role="ui-content" class="ui-page-theme-d ui_mini">
+
+        <div data-role="fieldcontain">
+          <label for="nightscout_url">Nightscout URL:</label>
+          <input type="url" name="nightscout_url" id="nightscout_url" placeholder="https://{your ns site}.azurewebsites.net"></input>
+        </div>
+        <div data-role="fieldcontain" >
+		    <label for="timeline">Pebble Timeline Pin:</label>
+		    <input type="checkbox" data-role="flipswitch" name="timeline" id="timeline" />
+        </div>
+
+        <div class="ui-body ui-body-c ui-mini">
+          <fieldset class="ui-grid-c" >
+              <div class="ui-block-a"><label>Label</label></div>
+              <div class="ui-block-b"><label>Default</label></div>
+              <div class="ui-block-c"><label>Increment</label></div>
+              <div class="ui-block-d"><label>ns Update</label></div>
+              <div class="ui-block-a"><input type="text" id="label1" name="label1"></input></div>
+              <div class="ui-block-b"><input type="number" id="def1" name="def1" min="1"></input></div>
+              <div class="ui-block-c"><input type="number" id="inc1" name="inc1" min="0.5" step="0.5"></input></div>
+              <div class="ui-block-d">
+			    <select  id="ns1" name="ns1" >
+				  <option value="" ></option>
+				  <option value="IOB" >IOB</option>
+				  <option value="COB" >COB</option>
+				</select>
+			  </div>
+              <div class="ui-block-a"><input type="text" id="label2" name="label2"></input></div>
+              <div class="ui-block-b"><input type="number" id="def2" name="def2" min="1"></input></div>
+              <div class="ui-block-c"><input type="number" id="inc2" name="inc2" min="0.5" step="0.5"></input></div>
+              <div class="ui-block-d">
+			    <select id="ns2" name="ns2" >
+				  <option value="" ></option>
+				  <option value="IOB" >IOB</option>
+				  <option value="COB" >COB</option>
+				</select>
+			  </div>
+              <div class="ui-block-a"><input type="text" id="label3" name="label3"></input></div>
+              <div class="ui-block-b"><input type="number" id="def3" name="def3" min="1"></input></div>
+              <div class="ui-block-c"><input type="number" id="inc3" name="inc3" min="0.5" step="0.5"></input></div>
+              <div class="ui-block-d">
+			    <select id="ns3" name="ns3" >
+				  <option value="" ></option>
+				  <option value="IOB" >IOB</option>
+				  <option value="COB" >COB</option>
+				</select>
+			  </div>
+              <div class="ui-block-a"><input type="text" id="label4" name="label4"></input></div>
+              <div class="ui-block-b"><input type="number" id="def4" name="def4" min="1"></input></div>
+              <div class="ui-block-c"><input type="number" id="inc4" name="inc4" min="0.5" step="0.5"></input></div>
+              <div class="ui-block-d">
+			    <select id="ns4" name="ns4" >
+				  <option value="" ></option>
+				  <option value="IOB" >IOB</option>
+				  <option value="COB" >COB</option>
+				</select>
+			  </div>
+              <div class="ui-block-a"><input type="text" id="label5" name="label5"></input></div>
+              <div class="ui-block-b"><input type="number" id="def5" name="def5" min="1"></input></div>
+              <div class="ui-block-c"><input type="number" id="inc5" name="inc5" min="0.5" step="0.5"></input></div>
+              <div class="ui-block-d">
+			    <select id="ns5" name="ns5" >
+				  <option value="" ></option>
+				  <option value="IOB" >IOB</option>
+				  <option value="COB" >COB</option>
+				</select>
+			  </div>
+         </fieldset>
+        </div>
+          <fieldset >
+               <div><button type="submit" id="submit">Submit</button></div>
+            </fieldset>
+        </div>
+      </div>
+    </div>
+    <script>
+      function saveOptions() {
+        var options = {
+          'nightscout_url': $("#nightscout_url").val(),
+          'timeline': $("#timeline").is(':checked'),
+          'label1':  $("#label1").val(),
+          'def1': $("#def1").val(),
+          'inc1': $("#inc1").val(),
+          'ns1': $('#ns1').selectmenu().val(),
+          'label2':  $("#label2").val(),
+          'def2': $("#def2").val(),
+          'inc2': $("#inc2").val(),
+          'ns2': $('#ns2').selectmenu().val(),
+          'label3':  $("#label3").val(),
+          'def3': $("#def3").val(),
+          'inc3': $("#inc3").val(),
+          'ns3': $('#ns3').selectmenu().val(),
+          'label4':  $("#label4").val(),
+          'def4': $("#def4").val(),
+          'inc4': $("#inc4").val(),
+          'ns4': $('#ns4').selectmenu().val(),
+          'label5':  $("#label5").val(),
+          'def5': $("#def5").val(),
+          'inc5': $("#inc5").val(),
+          'ns5': $('#ns5').selectmenu().val(),
+        }
+        return options;
+      }
+
+      $().ready(function() {
+        $("#submit").click(function() {
+          console.log("Submit");
+		  var options = JSON.stringify(saveOptions()) ;
+          var location = "pebblejs://close#" + encodeURIComponent(options);
+          console.log("Warping to: " + options);
+          console.log(location);
+          document.location = location;
+        });
+
+		var current = JSON.parse(getQueryParam('current', '{}'));
+		populateValues(current);
+
+      });
+
+	function populateValues(current) {
+    document.getElementById('nightscout_url').value = current['nightscout_url'];
+
+    if (current.timeline === true) {
+	  $('#timeline').attr('checked','');
+      $('#timeline').parent('div').addClass('ui-flipswitch-active');
+    }
+ 
+    document.getElementById('label1').value = current['label1'];
+    document.getElementById('def1').value = current['def1'];
+    document.getElementById('inc1').value = current['inc1'];
+    document.getElementById('ns1').value = current['ns1'];
+	$('#ns1').siblings('span').text(current['ns1']);
+    document.getElementById('label2').value = current['label2'];
+    document.getElementById('def2').value = current['def2'];
+    document.getElementById('inc2').value = current['inc2'];
+    document.getElementById('ns2').value = current['ns2'];
+	$('#ns2').siblings('span').text(current['ns2']);
+    document.getElementById('label3').value = current['label3'];
+    document.getElementById('def3').value = current['def3'];
+    document.getElementById('inc3').value = current['inc3'];
+    document.getElementById('ns3').value = current['ns3'];
+ 	$('#ns3').siblings('span').text(current['ns3']);
+   document.getElementById('label4').value = current['label4'];
+    document.getElementById('def4').value = current['def4'];
+    document.getElementById('inc4').value = current['inc4'];
+    document.getElementById('ns4').value = current['ns4'];
+ 	$('#ns41').siblings('span').text(current['ns4']);
+   document.getElementById('label5').value = current['label5'];
+    document.getElementById('def5').value = current['def5'];
+    document.getElementById('inc5').value = current['inc5'];
+    document.getElementById('ns5').value = current['ns5'];
+	$('#ns51').siblings('span').text(current['ns5']);
+
+
+	}
+
+  function getQueryParam(variable, defaultValue) {
+    var query = document.location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split('=');
+      if (pair[0] === variable) {
+        return decodeURIComponent(pair[1]);
+      }
+    }
+    return defaultValue || false;
+  }
+
+	  </script>
+  </body>
+</html>
