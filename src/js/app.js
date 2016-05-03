@@ -5,7 +5,7 @@ console.log('start!');
 
 
 Pebble.addEventListener('showConfiguration', function() {
-  var url = 'http://www.zjed.net/Configuration.html';
+  var url = 'http://zjedr.github.io/PinIt/Configuration.html';
   var config = JSON.parse(localStorage.getItem('config'));
   url += '?current=' + encodeURIComponent(JSON.stringify(config));
   console.log('Showing configuration page: ' + url);
@@ -57,18 +57,16 @@ Pebble.addEventListener('ready', function() {
     console.log("Is the browser online? " + internet_status);
 
     // tell the C side we're ready
-    if (internet_status) {
-      Pebble.sendAppMessage({0:0});
-      var config = JSON.parse(localStorage.getItem('config'));
+    Pebble.sendAppMessage({0:0});
+    var config = JSON.parse(localStorage.getItem('config'));
 
-      console.log('local:' + JSON.stringify(config));
-
-      if (config !== null ) {
-         LoadConfig(config) ;  
-      }
-    } else {
-      Pebble.sendAppMessage({0:2});
+ 
+    if (config === null ) {
+        config = {"nightscout_url":"","timeline":true,"label1":"Bolus","def1":"1","inc1":"0.5","ns1":"","label2":"Carbs","def2":"10","inc2":"5","ns2":"","label3":"","def3":"","inc3":"","ns3":"","label4":"","def4":"","inc4":"","ns4":"","label5":"","def5":"","inc5":"","ns5":""} ;
     }
+
+    console.log('local:' + JSON.stringify(config));
+    LoadConfig(config) ;  
 
     // log the timeline token
     console.log('My timeline token is ' + token);
