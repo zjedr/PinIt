@@ -5,12 +5,13 @@
 #define APP_KEY_MSG_TYPE 0
 
 static Window *s_menu_window, *s_counter_window, *s_message_window;
-static TextLayer *s_text_layer, *s_message_text_layer, *s_counter_text_layer, *s_header_layer, *s_body_layer, *s_label_layer;
-static char s_text_buffer[64], s_menu_text[32], s_body_text[32], s_numeric_text[8] ;
+static TextLayer *s_text_layer, *s_message_text_layer, *s_header_layer, *s_body_layer;
+static char s_menu_text[32], s_body_text[32], s_numeric_text[8] ;
 static MenuLayer *s_menu_layer;
 static ActionBarLayer *s_action_bar;
 static float s_num_counter ;
 static int s_int_key;
+static int menuline_count;
 static GBitmap *s_icon_plus, *s_icon_minus, *s_icon_check;
 AppMessageResult appsync_err_openerr = APP_MSG_OK;
 bool inConnected ;
@@ -76,71 +77,74 @@ static void request_pin() {
 
 
 void set_config(DictionaryIterator *data) {
-  int key = 0 ; 
+  menuline_count = 0 ; 
   Tuple *tuple = dict_find(data, APP_KEYS_LABEL1);
   if (tuple) {  
     if (strcmp(tuple->value->cstring,"") != 0 ) {
-      key++ ;
+      menuline_count++ ;
       strncpy(menuLine.name, tuple->value->cstring, 50);
-      menuLine.key = key ; 
+      menuLine.key = menuline_count ; 
       strncpy(s_numeric_text, dict_find(data, APP_KEYS_DEF1)->value->cstring, 8);
       menuLine.initValue = atoi(s_numeric_text)  ;
       strncpy(s_numeric_text, dict_find(data, APP_KEYS_INC1)->value->cstring, 8);
       menuLine.inc = atoi(s_numeric_text) ;
-      menu_array[key-1] = menuLine;
+      menu_array[menuline_count-1] = menuLine;
       }
   }
   
   tuple = dict_find(data, APP_KEYS_LABEL2);
   if (tuple) {  
      if (strcmp(tuple->value->cstring,"") != 0 ) {
-    key++ ;
+    menuline_count++ ;
     strncpy(menuLine.name, dict_find(data, APP_KEYS_LABEL2)->value->cstring, 50);
-    menuLine.key = key ; 
+    menuLine.key = menuline_count ; 
     strncpy(s_numeric_text, dict_find(data, APP_KEYS_DEF2)->value->cstring, 8);
     menuLine.initValue = atoi(s_numeric_text)  ;
     strncpy(s_numeric_text, dict_find(data, APP_KEYS_INC2)->value->cstring, 8);
     menuLine.inc = atoi(s_numeric_text) ;
-    menu_array[key-1] = menuLine;
+    menu_array[menuline_count-1] = menuLine;
   }
   }  
   tuple = dict_find(data, APP_KEYS_LABEL3);
   if (tuple) {  
+      APP_LOG(APP_LOG_LEVEL_INFO, "line3 %s", tuple->value->cstring);
+
     if (strcmp(tuple->value->cstring,"") != 0 ) {
-    key++ ;
+    menuline_count++ ;
     strncpy(menuLine.name, dict_find(data, APP_KEYS_LABEL3)->value->cstring, 50);
-    menuLine.key = key ; 
+    menuLine.key = menuline_count ; 
     strncpy(s_numeric_text, dict_find(data, APP_KEYS_DEF3)->value->cstring, 8);
     menuLine.initValue = atoi(s_numeric_text)  ;
     strncpy(s_numeric_text, dict_find(data, APP_KEYS_INC3)->value->cstring, 8);
     menuLine.inc = atoi(s_numeric_text) ;
-    menu_array[key-1] = menuLine;
+    menu_array[menuline_count-1] = menuLine;
   }
   }  
   tuple = dict_find(data, APP_KEYS_LABEL4);
   if (tuple) {  
-    if (strcmp(tuple->value->cstring,"") != 0 ) {
-    key++ ;
+       APP_LOG(APP_LOG_LEVEL_INFO, "line4 %s", tuple->value->cstring);
+   if (strcmp(tuple->value->cstring,"") != 0 ) {
+    menuline_count++ ;
     strncpy(menuLine.name, dict_find(data, APP_KEYS_LABEL4)->value->cstring, 50);
-    menuLine.key = key ; 
+    menuLine.key = menuline_count ; 
     strncpy(s_numeric_text, dict_find(data, APP_KEYS_DEF4)->value->cstring, 8);
     menuLine.initValue = atoi(s_numeric_text)  ;
     strncpy(s_numeric_text, dict_find(data, APP_KEYS_INC4)->value->cstring, 8);
     menuLine.inc = atoi(s_numeric_text) ;
-    menu_array[key-1] = menuLine;
+    menu_array[menuline_count-1] = menuLine;
    }
   }  
   tuple = dict_find(data, APP_KEYS_LABEL5);
   if (tuple) {  
     if (strcmp(tuple->value->cstring,"") != 0 ) {
-    key++ ;
+    menuline_count++ ;
     strncpy(menuLine.name, dict_find(data, APP_KEYS_LABEL5)->value->cstring, 50);
-    menuLine.key = key ; 
+    menuLine.key = menuline_count ; 
     strncpy(s_numeric_text, dict_find(data, APP_KEYS_DEF5)->value->cstring, 8);
     menuLine.initValue = atoi(s_numeric_text)  ;
     strncpy(s_numeric_text, dict_find(data, APP_KEYS_INC5)->value->cstring, 8);
     menuLine.inc = atoi(s_numeric_text) ;
-    menu_array[key-1] = menuLine;
+    menu_array[menuline_count-1] = menuLine;
   } 
 }
  //  APP_LOG(APP_LOG_LEVEL_INFO, "float str %s", atof(s_numeric_text));
@@ -148,7 +152,13 @@ void set_config(DictionaryIterator *data) {
   
   APP_LOG(APP_LOG_LEVEL_INFO, "line %s", menuLine.name);
   window_stack_pop(false);
-  window_stack_push(s_menu_window, false);
+  if (menuline_count == 1 ) {
+    s_int_key = 0 ;
+    s_num_counter = menu_array[s_int_key].initValue ;
+    window_stack_push(s_counter_window, false);
+  } else {
+    window_stack_push(s_menu_window, false);
+  }
 }
 
 
@@ -177,8 +187,7 @@ static void in_received_handler(DictionaryIterator *received, void *context) {
 }
 
 static uint16_t get_sections_count_callback(struct MenuLayer *menulayer, uint16_t section_index, void *callback_context) {
-  int count = sizeof(menu_array) / sizeof(MenuInfo);
-  return count;
+  return menuline_count;
 }
 
 #ifdef PBL_ROUND
@@ -192,19 +201,17 @@ static void select_callback(struct MenuLayer *s_menu_layer, MenuIndex *cell_inde
   s_int_key = menu_array[cell_index->row].key - 1 ;
   s_num_counter = menu_array[s_int_key].initValue ;
   snprintf(s_menu_text, sizeof(s_menu_text),"selected %i ", s_int_key );
-  APP_LOG(APP_LOG_LEVEL_INFO, s_menu_text);
+  APP_LOG(APP_LOG_LEVEL_INFO, "%s", s_menu_text);
     
   window_stack_push(s_counter_window, false);
 }
 
 static void draw_row_handler(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
   char* name = menu_array[cell_index->row].name;
-  if (strcmp(name,"") != 0 )  {
-    int text_gap_size = MENU_TEXT_GAP - strlen(name);
   
+    int text_gap_size = MENU_TEXT_GAP - strlen(name);
     snprintf(s_menu_text, sizeof(s_menu_text), "%s%*s", PBL_IF_ROUND_ELSE("", name), PBL_IF_ROUND_ELSE(0, text_gap_size), "");
     menu_cell_basic_draw(ctx, cell_layer, PBL_IF_ROUND_ELSE(name, s_menu_text), PBL_IF_ROUND_ELSE(s_menu_text, NULL), NULL);
-  }
 }
 
 static void menu_window_load(Window *window) {
@@ -224,7 +231,6 @@ static void menu_window_load(Window *window) {
 }
 
 static void update_counter() {
-  static char s_body_text[18];
   text_layer_set_text(s_header_layer, menu_array[s_int_key].name);
   int show_int = s_num_counter ;
   
