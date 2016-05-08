@@ -25,7 +25,10 @@
 		    <label for="timeline">Pebble Timeline Pin:</label>
 		    <input type="checkbox" data-role="flipswitch" name="timeline" id="timeline" />
         </div>
-
+        <div data-role="fieldcontain" >
+		    <label for="timeline">Duration of Insulin Action:</label>
+		    <input type="number" name="dia" id="dia" min="1" />
+        </div>
         <div class="ui-body ui-body-c ui-mini">
           <fieldset class="ui-grid-c" >
               <div class="ui-block-a"><label>Label</label></div>
@@ -115,6 +118,7 @@
           'def5': $("#def5").val(),
           'inc5': $("#inc5").val(),
           'ns5': $('#ns5').selectmenu().val(),
+		  'dia': $('#dia').val()
         }
         return options;
       }
@@ -141,7 +145,8 @@
 	  $('#timeline').attr('checked','');
       $('#timeline').parent('div').addClass('ui-flipswitch-active');
     }
- 
+	document.getElementById('dia').value = current['dia'];
+	
     document.getElementById('label1').value = current['label1'];
     document.getElementById('def1').value = current['def1'];
     document.getElementById('inc1').value = current['inc1'];
