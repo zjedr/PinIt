@@ -5,8 +5,8 @@
 #define APP_KEY_MESSAGE = 100
 
 static Window *s_menu_window, *s_counter_window, *s_message_window;
-static TextLayer *s_text_layer, *s_message_text_layer, *s_header_layer, *s_body_layer, *s_iob_layer;
-static char s_menu_text[32], s_body_text[32], s_numeric_text[8], s_message_text[32], s_iob_text[32], s_float_text[32];
+static TextLayer *s_text_layer, *s_message_text_layer, *s_header_layer, *s_body_layer, *s_iob_layer, *s_ago_layer;
+static char s_menu_text[32], s_body_text[32], s_numeric_text[8], s_message_text[32], s_iob_text[32], s_float_text[32], s_ago_text[32];
 static MenuLayer *s_menu_layer;
 static ActionBarLayer *s_action_bar;
 static float s_num_counter ;
@@ -15,7 +15,8 @@ static int menuline_count;
 static int floatMultiplier = 1000 ;
 static GBitmap *s_icon_plus, *s_icon_minus, *s_icon_check;
 AppMessageResult appsync_err_openerr = APP_MSG_OK;
-
+char minAgo[10], iob[10];
+float lastDose ;
 
 
 enum {
@@ -30,7 +31,7 @@ typedef struct {
   int key;  // initial value
   int initValue;  // initial value
   float inc; // increment
-  float iob; // iob
+  char type[10];
 } MenuInfo;
 
 static MenuInfo menuLine;
@@ -64,8 +65,7 @@ void setLine(DictionaryIterator *treatment) {
     menuLine.initValue = atoi(s_numeric_text)  ;
     strncpy(s_numeric_text, dict_find(treatment, treatmentKey + 2)->value->cstring, 8);
     menuLine.inc = (float) atoi(s_numeric_text) / floatMultiplier;
-    strncpy(s_numeric_text, dict_find(treatment, treatmentKey + 3)->value->cstring, 8);
-    menuLine.iob = (float) atoi(s_numeric_text) / floatMultiplier;
+    strncpy(menuLine.type, dict_find(treatment, treatmentKey + 3 )->value->cstring, 10);
     menu_array[menuline_count-1] = menuLine;
   
     APP_LOG(APP_LOG_LEVEL_INFO, "line %s ", menuLine.name);
@@ -103,6 +103,22 @@ void set_config(DictionaryIterator *data) {
       treatmentKey = 500;
       setLine(data); 
   }
+  
+  tuple = dict_find(data, 1000);
+  if (tuple) {  
+     strncpy(iob, tuple->value->cstring, 10);
+  }
+  tuple = dict_find(data, 1001);
+  if (tuple) {  
+     strncpy(minAgo, tuple->value->cstring, 10);
+  }
+  tuple = dict_find(data, 1002);
+  if (tuple) {  
+     lastDose = (float) atoi(tuple->value->cstring) / floatMultiplier;
+  }
+  APP_LOG(APP_LOG_LEVEL_INFO, "ago %s", minAgo);
+  APP_LOG(APP_LOG_LEVEL_INFO, "last: %i", (int) lastDose);
+
 
  //  APP_LOG(APP_LOG_LEVEL_INFO, "float str %s", atof(s_numeric_text));
  
@@ -257,36 +273,56 @@ static void counter_window_load(Window *window) {
   action_bar_layer_set_icon(s_action_bar, BUTTON_ID_SELECT, s_icon_check);
 
   int width = layer_get_frame(window_layer).size.w - ACTION_BAR_WIDTH - 3;
-  int height = layer_get_frame(window_layer).size.h / 2;
+  int height = layer_get_frame(window_layer).size.h ;
+  int centerH = height / 2;
   
   s_iob_layer = text_layer_create(GRect(0, 15, width, 60));
   text_layer_set_font(s_iob_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_background_color(s_iob_layer, GColorClear);
   text_layer_set_text_alignment(s_iob_layer, GTextAlignmentCenter);
-  if ( menu_array[s_int_key].iob != -1 ) {
-    if ( (int) menu_array[s_int_key].iob != menu_array[s_int_key].iob ) {
-      snprintf(s_float_text, sizeof(s_float_text), "%d.%d", (int) menu_array[s_int_key].iob, (int) (menu_array[s_int_key].iob * 100) % 100 );
-    } else {
-      snprintf(s_float_text, sizeof(s_float_text), "%d",(int) menu_array[s_int_key].iob);
-    }
-    snprintf(s_iob_text, sizeof(s_iob_text), "IOB: %s" , s_float_text);
+
+  if ( strcmp(menu_array[s_int_key].type,"IOB") == 0 && strcmp(iob,"") != 0 ) {
+    snprintf(s_iob_text, sizeof(s_iob_text), "IOB: %s" , iob);
   } else {
     strcpy(s_iob_text, "" );
   }
-  
   text_layer_set_text(s_iob_layer, s_iob_text);
   layer_add_child(window_layer, text_layer_get_layer(s_iob_layer));
+
+  APP_LOG(APP_LOG_LEVEL_INFO, "ago %s", minAgo);
+  APP_LOG(APP_LOG_LEVEL_INFO, "last: %i", (int) lastDose);
+
+  s_ago_layer = text_layer_create(GRect(0, height - 50, width, 30));
+  text_layer_set_font(s_ago_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_background_color(s_ago_layer, GColorClear);
+  text_layer_set_text_alignment(s_ago_layer, GTextAlignmentCenter);
+  if ( strcmp(menu_array[s_int_key].type,"IOB") == 0 && strcmp(minAgo,"-1") != 0 ) {
+    if ( (int) lastDose != lastDose ) {
+      snprintf(s_float_text, sizeof(s_float_text), "%d.%d", (int) lastDose, (int) (lastDose * 10) % 10 );
+    } else {
+      snprintf(s_float_text, sizeof(s_float_text), "%d",(int) lastDose);
+    }
+    snprintf(s_ago_text, sizeof(s_ago_text), "%s  %su" , minAgo, s_float_text);
+  } else {
+    strcpy(s_ago_text, "" );
+  }
+    APP_LOG(APP_LOG_LEVEL_INFO, "here: %s", s_ago_text);
+
+  text_layer_set_text(s_ago_layer, s_ago_text);
+  layer_add_child(window_layer, text_layer_get_layer(s_ago_layer));
   
-  s_header_layer = text_layer_create(GRect(0, height - 30, width, 60));
+  s_header_layer = text_layer_create(GRect(0, centerH - 40, width, 60));
   text_layer_set_font(s_header_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_background_color(s_header_layer, GColorClear);
+  text_layer_set_text_color(s_header_layer, GColorJaegerGreen );
   text_layer_set_text_alignment(s_header_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_header_layer));
 
-  s_body_layer = text_layer_create(GRect(0, height , width, 60));
+  s_body_layer = text_layer_create(GRect(0, centerH - 10, width, 60));
   text_layer_set_font(s_body_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
   text_layer_set_background_color(s_body_layer, GColorClear);
   text_layer_set_text_alignment(s_body_layer, GTextAlignmentCenter);
+  text_layer_set_text_color(s_body_layer, GColorJaegerGreen );
   layer_add_child(window_layer, text_layer_get_layer(s_body_layer));
 
   update_counter();

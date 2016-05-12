@@ -1,26 +1,32 @@
 var treatments;  
+var latestTreatment = {"date": null  , "value": 0 }; 
 
 function calcIOB(dia) {
   var now = Date.now();
-  treatments = parseTreatments(now) ;
-  
-   var totalIOB = 0 ;
-
-    for( var i = 0; i < treatments.length; i++) {
-      if (treatments[i].date <= now) {
-        var iobContrib = calcTreatment(treatments[i], dia, now);
-        if (iobContrib) { totalIOB += iobContrib; }
-      }
+  var treatmentinfo = parseTreatments(now) ;
+  treatments = treatmentinfo.treatments ;
+  latestTreatment = treatmentinfo.latest ;
+  var totalIOB = null ;
+  for( var i = 0; i < treatments.length; i++) {
+    if (treatments[i].date <= now) {
+      var iobContrib = calcTreatment(treatments[i], dia, now);
+      if (iobContrib) { totalIOB += iobContrib; }
     }
+  }
+  var minutesAgo = -1 ;
+  if (totalIOB === null ) {totalIOB = -1 ;}
+  if (latestTreatment.date !== null ) {
+    minutesAgo = ( now  - latestTreatment.date ) / 60000 ;
+  }
   console.log ("treatments:" + JSON.stringify(treatments) ) ;
   
-	return totalIOB ;
+  return { IOB: totalIOB, minAgo : parseInt(minutesAgo), lastDose : latestTreatment.value } ;
 }
 
 function calcTreatment(treatment, dia, time) {
  
-    var scaleFactor = 3.0 / dia      , peak = 75      , iobContrib = 0;
-
+    var scaleFactor = 3.0 / dia, peak = 75, iobContrib = 0;
+    iobContrib = 0 ;
     if (treatment.value) {
       var bolusTime = treatment.date;
       var minAgo = scaleFactor * (time - bolusTime) / 1000 / 60;
@@ -49,14 +55,17 @@ function parseTreatments( now ) {
   var oldTime = now - ONE_DAY ;
   if ( treatments !== null ) {
     for( var i = 0; i < treatments.length; i++) {
-      if (treatments[i].date > oldTime) {
+      if (treatments[i].date > latestTreatment.date ) {
+        latestTreatment = treatments[i] ;
+      }
+     if (treatments[i].date > oldTime) {
         currentTreatments.push(treatments[i]);
       }
     }
   }
   localStorage.setItem('treatments', JSON.stringify(currentTreatments));
   
-  return currentTreatments;
+  return { treatments: currentTreatments, latest : latestTreatment } ;
  
 }
 
@@ -74,4 +83,5 @@ module.exports.calcIOB = calcIOB;
 module.exports.addEntry = addEntry;
 
 
-  
+ // var iobResult = iob.calcTotal(data.treatments, dia);
+ 

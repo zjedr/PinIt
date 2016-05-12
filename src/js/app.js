@@ -19,6 +19,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
   var config = JSON.parse(decodeURIComponent(e.response));
   console.log('Configuration page returned: ' + JSON.stringify(config));
   localStorage.setItem('config', JSON.stringify(config));
+  localStorage.setItem('PinIt_DIA', config.dia);
   
   LoadConfig(config) ;  
   
@@ -26,29 +27,34 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
 function LoadConfig(config) {
   
-  var iob1 = -1, iob2 = -1, iob3 = -1, iob4 = -1, iob5 = -1 ;
-  var myIOB = iob.calcIOB(config.dia);
-  console.log('myIOB: ' + myIOB); 
+  var data = iob.calcIOB(config.dia);
+  var mins = data.minAgo ;
+  var hours = 0 ;
+  var timeString ;
+  console.log('data: ' + JSON.stringify(data)); 
+  while ( mins >= 60 ) {
+     hours+=1 ; 
+     mins-=60 ;
+   }
+  if ( hours > 0 ) {
+    timeString = hours.toString() + "h ";
+  } else {
+    timeString += mins.toString() + "m"; 
+  }
   
-  if ( config.ns1 == "IOB" ) { iob1 = myIOB; } 
-  if ( config.ns2 == "IOB" ) { iob2 = myIOB; } 
-  if ( config.ns3 == "IOB" ) { iob3 = myIOB; } 
-  if ( config.ns4 == "IOB" ) { iob4 = myIOB; }
-  if ( config.ns5 == "IOB" ) { iob5 = myIOB; } 
-    
   var message = {AppKeyReady: 1,
-      100: config.label1, 101: config.def1, 102: (config.inc1 * floatMultiplier).toString(), 103: parseInt(iob1 * floatMultiplier).toString(),
-      200: config.label2, 201: config.def2, 202: (config.inc2 * floatMultiplier).toString(), 203: parseInt(iob2 * floatMultiplier).toString(),
-      300: config.label3, 301: config.def2, 302: (config.inc3 * floatMultiplier).toString(), 303: parseInt(iob3 * floatMultiplier).toString(),
-      400: config.label4, 401: config.def2, 402: (config.inc4 * floatMultiplier).toString(), 403: parseInt(iob4 * floatMultiplier).toString(),
-      500: config.label5, 501: config.def2, 502: (config.inc5 * floatMultiplier).toString(), 503: parseInt(iob5 * floatMultiplier).toString()
+      100: config.label1, 101: config.def1, 102: (config.inc1 * floatMultiplier).toString(), 103: config.ns1,
+      200: config.label2, 201: config.def2, 202: (config.inc2 * floatMultiplier).toString(), 203: config.ns2,
+      300: config.label3, 301: config.def2, 302: (config.inc3 * floatMultiplier).toString(), 303: config.ns3,
+      400: config.label4, 401: config.def2, 402: (config.inc4 * floatMultiplier).toString(), 403: config.ns4,
+      500: config.label5, 501: config.def2, 502: (config.inc5 * floatMultiplier).toString(), 503: config.ns5,
+      1000: data.IOB.toFixed(2).toString() , 1001: timeString, 1002: parseInt(data.lastDose * floatMultiplier).toString() 
  };
   
   console.log('message: ' + JSON.stringify(message)); 
   Pebble.sendAppMessage(message, function() {
      console.log('Send successful: ' + JSON.stringify(message));
-     console.log('save config: ' + JSON.stringify(config));
-   
+   //  console.log('save config: ' + JSON.stringify(config));
      localStorage.setItem('config', JSON.stringify(config));
   }, function() {
     console.log('Send failed!');
@@ -57,8 +63,7 @@ function LoadConfig(config) {
 
 Pebble.addEventListener('ready', function() {
   console.log('PebbleKit JS ready!');
-    Pebble.getTimelineToken(function (token) {
-
+ 
     var internet_status = navigator.onLine;
     console.log("Is the browser online? " + internet_status);
 
@@ -73,18 +78,6 @@ Pebble.addEventListener('ready', function() {
 
     console.log('local:' + JSON.stringify(config));
     LoadConfig(config) ;  
-
-    // log the timeline token
-    console.log('My timeline token is ' + token);
-
-    // store the token in our global var
-//    myToken = token;
-
-  }, function (error) {
-    // log the error
-    console.log('Error getting timeline token: ' + error);
-  });
-
 
 });
 
@@ -166,8 +159,6 @@ Pebble.addEventListener('appmessage', function(e) {
     iob.addEntry(iobEntry) ;    
   }
   if ( s_ns == 'COB') { s_unit = 'g';}
-  
-  
   
   console.log( 'title:' +  s_title + ':' + s_value  + ':' + s_ns );
   PostNightscout(config.nightscout_url, s_title, s_value, s_ns);
