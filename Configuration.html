@@ -99,7 +99,7 @@
         var options = {
           'nightscout_url': $("#nightscout_url").val(),
 		  'secret_api': $("#secret_api").val(),
-		  'hash_api': $('#hashAPI').val(Sha1.hash($('#secret_api').val())),
+		  'hash_api': Sha1.hash($('#secret_api').val()),
           'label1':  $("#label1").val(),
           'def1': $("#def1").val(),
           'inc1': $("#inc1").val(),
