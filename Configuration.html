@@ -21,12 +21,12 @@
           <label for="nightscout_url">Nightscout URL:</label>
           <input type="url" name="nightscout_url" id="nightscout_url" placeholder="https://{your ns site}.azurewebsites.net"></input>
         </div>
-        <div data-role="fieldcontain" >
-		    <label for="timeline">Pebble Timeline Pin:</label>
-		    <input type="checkbox" data-role="flipswitch" name="timeline" id="timeline" />
+        <div data-role="fieldcontain">
+          <label for="secret_api">API secret:</label>
+          <input type="url" name="secret_api" id="secret_api"></input>
         </div>
         <div data-role="fieldcontain" >
-		    <label for="timeline">Duration of Insulin Action:</label>
+		    <label for="dia">Duration of Insulin Action:</label>
 		    <input type="number" name="dia" id="dia" min="1" />
         </div>
         <div class="ui-body ui-body-c ui-mini">
@@ -97,7 +97,8 @@
       function saveOptions() {
         var options = {
           'nightscout_url': $("#nightscout_url").val(),
-          'timeline': $("#timeline").is(':checked'),
+		  'secret_api': $("#secret_api").val(),
+		  'hash_api': $('#hashAPI').val(Sha1.hash($('#secret_api').val()));
           'label1':  $("#label1").val(),
           'def1': $("#def1").val(),
           'inc1': $("#inc1").val(),
@@ -140,13 +141,7 @@
 
 	function populateValues(current) {
     document.getElementById('nightscout_url').value = current['nightscout_url'];
-
-    if (current.timeline === true) {
-	  $('#timeline').attr('checked','');
-      $('#timeline').parent('div').addClass('ui-flipswitch-active');
-    }
-	document.getElementById('dia').value = current['dia'];
-	
+    document.getElementById('secret_api').value = current['secret_api'];
     document.getElementById('label1').value = current['label1'];
     document.getElementById('def1').value = current['def1'];
     document.getElementById('inc1').value = current['inc1'];
@@ -172,7 +167,6 @@
     document.getElementById('inc5').value = current['inc5'];
     document.getElementById('ns5').value = current['ns5'];
 	$('#ns51').siblings('span').text(current['ns5']);
-
 
 	}
 
